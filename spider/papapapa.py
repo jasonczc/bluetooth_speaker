@@ -73,13 +73,13 @@ def dowmloadPicture(html, keyword):
             print('错误，当前图片无法下载')
             continue
         else:
-            string = file + r'\\' + keyword + '_' + str(num) + '.jpg'
+            string = file + r'/' + keyword + '_' + str(num) + '.jpg'
             fp = open(string, 'wb')
             fp.write(pic.content)
             fp.close()
             num += 1
         if num >= numPicture:
-            for jpgfile in glob.glob(file + "\\*.jpg"):
+            for jpgfile in glob.glob(file + "/*.jpg"):
                     convertjpg(jpgfile, file)
             return
 
