@@ -88,7 +88,7 @@ if __name__ == '__main__':  # 主函数入口
     with open('list.json', 'r') as f:
         line_list = json.load(f)
 
-    executor = ThreadPoolExecutor(max_workers=8)
+    executor = ThreadPoolExecutor(max_workers=32)
 
     for word in line_list:
         executor.submit(load_word,(word))

@@ -7,3 +7,15 @@
  */
 
 require_once('../bootstrap.php');
+$json = new OsmiumDB\LocalStorage\JSON(__DIR__ . "/regInfo.json");
+$data = $json->getAll();
+
+if (!isset($data["address"])){
+    $data = [
+        "address"=>"",
+        "lastActive"=>0
+    ];
+    $json->setAll($data);
+    $json->save();
+}
+

@@ -14,7 +14,7 @@ PHP+GOLANG+PYTHON
  - train   人工智能训练(分类)
 
 # 调用链
-## 垃圾分类
+## 垃圾分类功能
 ### 图像识别
 音箱->Rokid云函数->Proxy服务器->Camera树莓派(调起摄像头)->Rec识别服务
 ->Camera树莓派->Proxy服务器->Rokid云函数->音箱
