@@ -1,4 +1,6 @@
 import re
+from concurrent.futures.thread import ThreadPoolExecutor
+
 import requests
 from urllib import error
 from bs4 import BeautifulSoup
@@ -8,19 +10,12 @@ from PIL import Image
 import os.path
 import glob
 
-num = 0
 numPicture = 0
-file = ''
-List = []
-
-
-def Find(url):
-    global List
+def Find(url, target_num):
+    list = []
     print('正在检测图片总数，请稍等.....')
-    t = 0
-    i = 1
-    s = 0
-    while t < 1000:
+    t = 0 # sum of now pic
+    while t < target_num:
         Url = url + str(t)
         try:
             Result = requests.get(Url, timeout=7)
@@ -28,42 +23,24 @@ def Find(url):
             t = t + 60
             continue
         else:
-            result = Result.text
+            result = Result.text#html
             pic_url = re.findall('"objURL":"(.*?)",', result, re.S)  # 先利用正则表达式找到图片url
-            s += len(pic_url)
-            if len(pic_url) == 0:
+            t += len(pic_url)
+            if len(pic_url) == 0: #has no pic
                 break
             else:
-                List.append(pic_url)
-                t = t + 60
-    return s
+                for v in pic_url:
+                    list.append(v)
+    return list
 
 
-def recommend(url):
-    Re = []
-    try:
-        html = requests.get(url)
-    except error.HTTPError as e:
-        return
-    else:
-        html.encoding = 'utf-8'
-        bsObj = BeautifulSoup(html.text, 'html.parser')
-        div = bsObj.find('div', id='topRS')
-        if div is not None:
-            listA = div.findAll('a')
-            for i in listA:
-                if i is not None:
-                    Re.append(i.get_text())
-        return Re
-
-
-def dowmloadPicture(html, keyword):
-    global num
-    # t =0
-    pic_url = re.findall('"objURL":"(.*?)",', html, re.S)  # 先利用正则表达式找到图片url
-    print('找到关键词:' + keyword + '的图片，即将开始下载图片...')
-    for each in pic_url:
-        print('正在下载第' + str(num + 1) + '张图片，图片地址:' + str(each))
+# download pic to file
+def download_picture(urls, keyword, file, numPicture):
+    tmp = 1
+    for each in urls:
+        if tmp > numPicture:
+            break
+        print('图片地址:',each,"|[",keyword,"]第[",tmp,"]个")
         try:
             if each is not None:
                 pic = requests.get(each, timeout=17)
@@ -73,62 +50,45 @@ def dowmloadPicture(html, keyword):
             print('错误，当前图片无法下载')
             continue
         else:
-            string = file + r'/' + keyword + '_' + str(num) + '.jpg'
+            tmp += 1
+            string = file + r'/' + keyword + '_' + str(tmp) + '.jpg'
             fp = open(string, 'wb')
             fp.write(pic.content)
             fp.close()
-            num += 1
-        if num >= numPicture:
-            for jpgfile in glob.glob(file + "/*.jpg"):
-                    convertjpg(jpgfile, file)
-            return
+
+    for jpgfile in glob.glob(file + "/*.jpg"):
+        convert_jpg(jpgfile, file)
+    return
 
 
-
-
-def convertjpg(jpgfile,outdir,width=299,height=299):
+def convert_jpg(jpgfile, outdir, width=299, height=299):
     try:
         img = Image.open(jpgfile)
-        new_img=img.resize((width,height),Image.BILINEAR)
-        new_img.save(os.path.join(outdir,os.path.basename(jpgfile)))
+        new_img = img.resize((width, height), Image.BILINEAR)
+        new_img.save(os.path.join(outdir, os.path.basename(jpgfile)))
     except Exception as e:
         print(e)
         os.remove(jpgfile)
 
 
+def load_word(word): # loader of async function
+    url = 'http://image.baidu.com/search/flip?tn=baiduimage&ie=utf-8&word=' + word + '&pn='
+    pic_urls = Find(url, numPicture) # find pic count of every word
+    print(len(pic_urls))
+    file = word
+    # create path
+    if os.path.exists(file) == 0:
+        os.mkdir(file)
+
+    download_picture(pic_urls, word, file, numPicture)
+
+
 if __name__ == '__main__':  # 主函数入口
-    tm = int(input('请输入每类图片的下载数量 '))
-    numPicture = tm
-    line_list = []
-    with open('list.json','r') as f:
+    numPicture = int(input('请输入每类图片的下载数量 '))
+    with open('list.json', 'r') as f:
         line_list = json.load(f)
 
-    for word in line_list:
-        url =  'http://image.baidu.com/search/flip?tn=baiduimage&ie=utf-8&word=' + word + '&pn='
-        tot = Find(url)
-        Recommend = recommend(url)  # 记录相关推荐
-        print('经过检测%s类图片共有%d张' % (word, tot))
-        file = word
-        y = os.path.exists(file)
-        if y == 1:
-            print('该文件已存在，请重新输入')
-            file = word + '2'
-            os.mkdir(file)
-        else:
-            os.mkdir(file)
-        t = 0
-        tmp = url
-        while t < numPicture:
-            try:
-                url = tmp + str(t)
-                result = requests.get(url, timeout=10)
-                print(url)
-            except error.HTTPError as e:
-                print('网络错误，请调整网络后重试')
-                t = t + 60
-            else:
-                dowmloadPicture(result.text, word)
-                t = t + 60
-        numPicture = numPicture + tm
+    executor = ThreadPoolExecutor(max_workers=8)
 
-    print('当前搜索结束，感谢使用')
+    for word in line_list:
+        executor.submit(load_word,(word))
