@@ -9,10 +9,10 @@
 define("SECURITY_BOOT",true);
 $file = __DIR__;
 define("WEB_ROOT_PATH",$file);
-define('_VIC_WORD_DICT_PATH_', __DIR__ . '/dict/dict.igb');
+define('_VIC_WORD_DICT_PATH_', __DIR__ . '/dict/dict.json');
 date_default_timezone_set('Asia/Shanghai');
 
 spl_autoload_register(function ($target_name) {
     if(!SECURITY_BOOT) return;
-    require_once __DIR__ . "bootstrap.php/" . str_replace("\\","/",$target_name) . ".php";
+    require_once __DIR__ . "/" . str_replace("\\","/",$target_name) . ".php";
     });
