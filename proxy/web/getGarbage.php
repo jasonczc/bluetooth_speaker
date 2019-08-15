@@ -16,7 +16,11 @@
         echo '我也不知道是什么垃圾';
         exit;
     }
-    $k = explode('是', $_POST['sentence']);
+    $k = explode('是', $_POST['sentence']);//处理词库
+
+
+
+
     if (isset($a[$k[0]])) {
         echo $a[$k[0]];
         exit;
