@@ -12,6 +12,7 @@ PHP+GOLANG+PYTHON
  - speaker 音箱固件源码
  - spider  训练集收集用爬虫
  - train   人工智能训练(分类)
+ - dict_analyse 处理垃圾分类数据(用于模糊搜索)
 
 # 调用链
 ## 垃圾分类功能
