@@ -45,7 +45,7 @@ $fc = new \Lizhichao\Word\VicWord('json');
 $ar = $fc->getAutoWord($k[0]);
 $ans = findKeyWords($ar);
 if($ans!==''&&!is_null($ans)){
-    echo $ans;
+    echo $k[0].$ans;
 }else{
     echo "我也不知道$k[0]是什么垃圾";
 }
@@ -79,6 +79,8 @@ function findKeyWords($v)
     $types = [
         "不锈钢"=>"可回收垃圾",
         "金属"=>"可回收垃圾",
+        "合金"=>"可回收垃圾",
+        "玻璃"=>"可回收垃圾"
     ];
     $dbms = 'mysql';     //数据库类型
     $host = 'localhost'; //数据库主机名
@@ -88,7 +90,9 @@ function findKeyWords($v)
     $dsn = "$dbms:host=$host;dbname=$dbName";
     $baseInfo='SELECT * from classify ';
     $flag = false;
+    $kk = 0;
     foreach($v as $vv){
+        $kk++;
         if(isset($types[$vv[0]])){
             return $vv[0]."类物品有可能是".$types[$vv[0]];
         }
@@ -102,6 +106,7 @@ function findKeyWords($v)
             $baseInfo = $baseInfo . ' name like "%'.$vv[0].'%" ';
         }
     }
+    if($kk===0) return;
     $baseInfo = $baseInfo . " limit 3";
     try {
         $dbh = new PDO($dsn, $user, $pass); //初始化一个PDO对象
@@ -114,7 +119,7 @@ function findKeyWords($v)
         $a = $dbh->query($baseInfo);
         $r = 0;
         foreach ($a as $row) {
-            $ans = $ans . "$row[1],它是" . $ww[$row[2]] . "   ";
+            $ans = $ans . "$row[1],它是" . $ww[$row[2]] . "  ,,";
             $r++;
         }
         if($r!==0) {
@@ -135,10 +140,6 @@ function find1($v){
         "8" => '干垃圾',
         "16" => '大件垃圾'
     ];
-    $types = [
-        "不锈钢"=>"可回收垃圾",
-        "金属"=>"可回收垃圾",
-    ];
     $dbms = 'mysql';     //数据库类型
     $host = 'localhost'; //数据库主机名
     $dbName = 'garbage';    //使用的数据库
@@ -148,9 +149,6 @@ function find1($v){
     $baseInfo='SELECT * from classify ';
     $flag = false;
     foreach($v as $vv){
-        if(isset($types[$vv[0]])){
-            return $vv[0]."类物品有可能是".$types[$vv[0]];
-        }
         if($vv[3]){
             if(!$flag){
                 $flag = true;
@@ -171,10 +169,13 @@ function find1($v){
         $ans = "我觉得你说的可能是,";
         $dbh->query('set names utf8;');
         $a = $dbh->query($baseInfo);
+        $r = 0;
         foreach ($a as $row) {
-            $ans = $ans."$row[1],它是".$ww[$row[2]]."   ";
+            $ans = $ans."$row[1],它是".$ww[$row[2]]."   ,,";
+            $r++;
         }
-        return $ans;
+        if($r!==0)
+            return $ans;
     } catch (PDOException $e) {
         echo ("Error!: " . $e->getMessage() . "<br/>");
     }
