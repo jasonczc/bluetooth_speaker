@@ -1,11 +1,12 @@
-#用于Pi
+# 用于Pi
 
 from tornado.web import RequestHandler, Application
 from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
 import requests
-from camera import picture_data
+from server.camera import picture_data
 import base64
+
 
 # 接受图片数据（bit）
 class upload_handler(RequestHandler):

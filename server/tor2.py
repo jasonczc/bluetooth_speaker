@@ -5,9 +5,11 @@ from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
 import requests
 import base64
+from server.Dintinguish_API.AipImageClassify import get_distinguish
 
 def translation(path):
-    return 1
+    data  = get_distinguish(path)
+    return data
 
 
 class result_handler(RequestHandler):
@@ -18,6 +20,7 @@ class result_handler(RequestHandler):
             f.write(picture_data)
         print(picture_data)
         result = translation("image.jpg")
+        print(result)
         data = {
             "result_word": result,
         }
