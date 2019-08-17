@@ -22,10 +22,10 @@ class result_handler(RequestHandler):
         result = translation("image1.jpg")
         result_word = result['result'][0]['keyword']
         print(result_word)
+        print(result)
         data = {
             'result_word': result_word
         }
-        requests.get("http://127.0.0.1:8000",data)
 
 
 
