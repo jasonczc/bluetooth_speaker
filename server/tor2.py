@@ -5,7 +5,8 @@ from tornado.ioloop import IOLoop
 from tornado.httpserver import HTTPServer
 import requests
 import base64
-from server.Dintinguish_API.AipImageClassify import get_distinguish
+import json
+from server.Distinguish_API.AipImageClassify import get_distinguish
 
 def translation(path):
     data  = get_distinguish(path)
@@ -18,13 +19,14 @@ class result_handler(RequestHandler):
         picture_data = base64.b64decode(b64_data)
         with open("image1.jpg", "wb") as f:
             f.write(picture_data)
-        print(picture_data)
-        result = translation("image.jpg")
-        print(result)
+        result = translation("image1.jpg")
+        result_word = result['result'][0]['keyword']
+        print(result_word)
         data = {
-            "result_word": result,
+            'result_word': result_word
         }
-        requests.get("http://localhost:8000/upload/192.0.0.1", data)
+        requests.get("http://127.0.0.1:8000",data)
+
 
 
 if __name__ == '__main__':
