@@ -24,9 +24,9 @@ class result_handler(RequestHandler):
         print(result_word)
         print(result)
         data = {
-            'result_word': result_word
+            'words': "tts:"+result_word
         }
-
+        requests.get("http://czy.likole.top/commandThing.php",data)
 
 
 if __name__ == '__main__':
