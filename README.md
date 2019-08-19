@@ -6,9 +6,11 @@
 PHP+GOLANG+PYTHON
 
 # 位置
+ - aip     百度api用依赖
  - camera  树莓派摄像头端(垃圾识别)
  - proxy   中转(用于与Rokid云函数的对调)
  - rec     识别端(用于使用训练后的模型)
+ - server  树莓派与rec服务端
  - speaker 音箱固件源码
  - spider  训练集收集用爬虫
  - train   人工智能训练(分类)
